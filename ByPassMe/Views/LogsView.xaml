@@ -1,0 +1,80 @@
+<UserControl x:Class="ByPassMe.Views.LogsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="16,0" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,12,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Source="/Assets/app-logo.png" Width="24" Height="24" Margin="0,0,8,0"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                <TextBlock Text="Логи" FontSize="17" FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource IconButton}" Content="📋" Click="OnCopy" ToolTip="Копировать"/>
+                <Button Style="{StaticResource IconButton}" Content="🗑" Click="OnClear" ToolTip="Очистить"
+                        Foreground="{StaticResource ErrorBrush}"/>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <ToggleButton x:Name="FilterAll" Content="Все" IsChecked="True" Style="{StaticResource FilterChip}"
+                          Click="OnFilterAll"/>
+            <ToggleButton x:Name="FilterVpn" Content="🛡 VPN" Style="{StaticResource FilterChip}"
+                          Click="OnFilterVpn"/>
+            <ToggleButton x:Name="FilterBypass" Content="🔒 Обход" Style="{StaticResource FilterChip}"
+                          Click="OnFilterBypass"/>
+            <ToggleButton x:Name="FilterService" Content="⚙ Сервис" Style="{StaticResource FilterChip}"
+                          Click="OnFilterService"/>
+        </StackPanel>
+
+        <Border Grid.Row="2" Background="{StaticResource TerminalBgBrush}"
+                CornerRadius="16" Margin="0,0,0,88" Padding="10">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="6" ShadowDepth="1" Opacity="0.2"/>
+            </Border.Effect>
+            <Grid>
+                <TextBlock x:Name="EmptyText"
+                           Text="Логи появятся после запуска VPN или Обхода Б/С"
+                           Foreground="{StaticResource TerminalCounterBrush}"
+                           FontFamily="Consolas" FontSize="13"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           TextAlignment="Center" TextWrapping="Wrap" Margin="16"/>
+                <ScrollViewer x:Name="LogScroller" VerticalScrollBarVisibility="Hidden" Visibility="Collapsed">
+                    <ItemsControl x:Name="LogList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Timestamp}" FontFamily="Consolas" FontSize="10"
+                                               Foreground="{StaticResource TerminalCounterBrush}" Margin="0,1,6,0"/>
+                                    <Border Grid.Column="1" Background="{Binding BadgeBg}" CornerRadius="4"
+                                            Padding="4,1" Margin="0,1,6,0" VerticalAlignment="Top">
+                                        <TextBlock Text="{Binding SourceLabel}" FontFamily="Consolas" FontSize="9"
+                                                   FontWeight="Bold" Foreground="{Binding BadgeFg}"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="2" Text="{Binding Message}" FontFamily="Consolas"
+                                               FontSize="11" TextWrapping="Wrap" Foreground="{Binding MessageBrush}"
+                                               FontWeight="{Binding MessageWeight}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

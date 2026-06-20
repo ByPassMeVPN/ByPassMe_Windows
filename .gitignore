@@ -1,0 +1,27 @@
+# Build / dist
+bin/
+obj/
+dist/
+.cache/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Secrets
+Secrets.props
+
+# Native binaries
+go_client/bypassclient.exe
+tools/
+
+# Publish
+publish/
+
+# OS
+Thumbs.db
+Desktop.ini
+ByPassMe/bypassclient.exe
