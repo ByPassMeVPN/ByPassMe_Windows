@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>ByPassMe</AssemblyName>
+    <RootNamespace>ByPassMe</RootNamespace>
+    <Version>1.1.33</Version>
+    <AssemblyVersion>1.1.33.0</AssemblyVersion>
+    <FileVersion>1.1.33.0</FileVersion>
+    <Company>FlyFrogLLC</Company>
+    <Product>ByPassMe</Product>
+    <Description>ByPassMe — обход Б/С через VK TURN + WireGuard</Description>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <ApplicationIcon>Assets\ByPassMe.ico</ApplicationIcon>
+    <HUB_MOS_TOKEN Condition="'$(HUB_MOS_TOKEN)' == ''">@HUB_MOS_TOKEN@</HUB_MOS_TOKEN>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\app-logo.png" />
+    <Resource Include="Assets\ByPassMe.ico" />
+    <Resource Include="Assets\Flags\*.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\go_client\bypassclient.exe" Link="bypassclient.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\go_client\bypassclient.exe')" />
+    <None Include="..\tools\wireguard.exe" Link="tools\wireguard.exe" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\tools\wireguard.exe')" />
+    <None Include="..\tools\wintun.dll" Link="tools\wintun.dll" CopyToOutputDirectory="PreserveNewest" Condition="Exists('..\tools\wintun.dll')" />
+  </ItemGroup>
+
+  <Import Project="..\Secrets.props" Condition="Exists('..\Secrets.props')" />
+
+</Project>

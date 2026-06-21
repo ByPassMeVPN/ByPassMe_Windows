@@ -1,0 +1,63 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: go_client/go.sum
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        env:
+          HUB_MOS_TOKEN: ${{ secrets.HUB_MOS_TOKEN }}
+          GOTOOLCHAIN: auto
+        run: |
+          if (-not $env:HUB_MOS_TOKEN) { $env:HUB_MOS_TOKEN = '@HUB_MOS_TOKEN@' }
+          .\build-windows.ps1 -Configuration Release -HubMosToken $env:HUB_MOS_TOKEN -CreateInstaller
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ByPassMe-Setup
+          path: dist/ByPassMe-Setup-*.exe
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $setup = Get-ChildItem "dist\ByPassMe-Setup-*.exe" | Select-Object -First 1
+          if (-not $setup) { throw "Установщик не найден" }
+          Copy-Item $setup.FullName "dist\ByPassMe-Setup.exe" -Force
+          $tag = "win-v$(Get-Date -Format 'yyyyMMddHHmm')"
+          gh release create $tag `
+            --title "ByPassMe Windows $tag" `
+            --notes "Установщик ByPassMe для Windows.`n`n• Запустите ByPassMe-Setup.exe`n• WireGuard включён — ничего скачивать отдельно не нужно`n• Создайте ярлык и вставьте ссылку подписки" `
+            --latest `
+            "$($setup.FullName)" `
+            "dist\ByPassMe-Setup.exe"

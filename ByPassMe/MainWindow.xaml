@@ -1,0 +1,63 @@
+<Window x:Class="ByPassMe.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:ByPassMe.Controls"
+        Title="ByPassMe"
+        Icon="/Assets/ByPassMe.ico"
+        Width="412" Height="892" MinWidth="412" MaxWidth="412" MinHeight="892" MaxHeight="892"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackgroundBrush}">
+    <Grid>
+        <controls:AppBackdropControl/>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ContentControl x:Name="MainContent" Grid.Row="0"/>
+
+            <!-- Android ProxyNavigationBar -->
+            <Border x:Name="NavBar" Grid.Row="1" Visibility="Collapsed"
+                    Background="{StaticResource NavShellBrush}"
+                    CornerRadius="28" Margin="22,0,22,16"
+                    Padding="8,6" BorderBrush="{StaticResource NavBorderBrush}" BorderThickness="1"
+                    Height="80" ClipToBounds="True">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.12"/>
+                </Border.Effect>
+                <Grid x:Name="NavGrid" Margin="4,2" ClipToBounds="True">
+                    <Border x:Name="NavIndicator" Background="{StaticResource NavIndicatorBrush}"
+                            CornerRadius="20" Height="64" VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="NavIndicatorTransform"/>
+                        </Border.RenderTransform>
+                    </Border>
+                    <UniformGrid Columns="2">
+                        <Button x:Name="TabBypass" Style="{StaticResource NavTabButton}"
+                                Click="OnTabBypass" Padding="0,2,0,4">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="TabBypassIcon" Text="🛡" FontSize="20" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Обход Б/С" FontSize="11" HorizontalAlignment="Center" Margin="0,2,0,0"
+                                           LineHeight="14" LineStackingStrategy="BlockLineHeight"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="TabLogs" Style="{StaticResource NavTabButton}"
+                                Click="OnTabLogs" Padding="0,2,0,4">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="TabLogsIcon" Text="⌨" FontSize="20" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Логи" FontSize="11" HorizontalAlignment="Center" Margin="0,2,0,0"
+                                           LineHeight="14" LineStackingStrategy="BlockLineHeight"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
