@@ -1,0 +1,34 @@
+<UserControl x:Class="ByPassMe.Views.OnboardingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Background="Transparent">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                    MaxWidth="380" Margin="24">
+            <TextBlock Text="ByPassMe" FontSize="28" FontWeight="ExtraBold"
+                       Foreground="{StaticResource PrimaryBrush}"
+                       HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+            <TextBlock x:Name="ContextMessage" Text="Вставьте ссылку подписки, чтобы начать"
+                       FontSize="13" Foreground="{StaticResource TextSecondaryBrush}"
+                       TextAlignment="Center" TextWrapping="Wrap"
+                       HorizontalAlignment="Center" Margin="0,0,0,14"/>
+
+            <Border Style="{StaticResource CompactLinkCard}" HorizontalAlignment="Stretch">
+                <StackPanel>
+                    <TextBlock Text="Ссылка подписки" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
+                    <TextBox x:Name="UrlInput" Style="{StaticResource LinkTextBox}"
+                             TextChanged="OnUrlChanged"/>
+                    <TextBlock x:Name="ErrorText" Foreground="{StaticResource ErrorBrush}"
+                               FontSize="11" Visibility="Collapsed" Margin="0,4,0,0"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <Button x:Name="ConnectBtn" Content="Подключить"
+                    Style="{StaticResource CompactPrimaryButton}"
+                    HorizontalAlignment="Center" MinWidth="160" Margin="0,14,0,0"
+                    Click="OnConnect"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

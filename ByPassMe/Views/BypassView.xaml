@@ -1,0 +1,303 @@
+<UserControl x:Class="ByPassMe.Views.BypassView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:ByPassMe.Controls"
+             xmlns:conv="clr-namespace:ByPassMe.Converters">
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <!-- Invisible scrollbar: default scroll engine, zero-width bars -->
+        <Style x:Key="HiddenScrollBar" TargetType="ScrollBar">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+        <!-- Android-like stepped power slider -->
+        <Style x:Key="WorkersSteppedSlider" TargetType="Slider">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Background" Value="{StaticResource SurfaceVariantBrush}"/>
+            <Setter Property="Height" Value="34"/>
+            <Setter Property="Minimum" Value="9"/>
+            <Setter Property="Maximum" Value="27"/>
+            <Setter Property="TickFrequency" Value="9"/>
+            <Setter Property="IsSnapToTickEnabled" Value="True"/>
+            <Setter Property="IsMoveToPointEnabled" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid VerticalAlignment="Center" Height="34">
+                            <Border x:Name="TrackBg" Height="5" CornerRadius="2.5"
+                                    Background="{TemplateBinding Background}"
+                                    VerticalAlignment="Center" Margin="9,0"/>
+                            <Track x:Name="PART_Track">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Opacity="0" IsTabStop="False" Focusable="False" Command="Slider.DecreaseLarge"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Opacity="0" IsTabStop="False" Focusable="False" Command="Slider.IncreaseLarge"/>
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Width="18" Height="18">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Grid>
+                                                    <Ellipse Width="18" Height="18"
+                                                             Fill="{StaticResource PrimaryBrush}"
+                                                             Stroke="{StaticResource CardBrush}"
+                                                             StrokeThickness="2"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                            <!-- tick marks 9 / 18 / 27 -->
+                            <Grid Margin="9,0" IsHitTestVisible="False" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Ellipse Width="4" Height="4" Fill="{StaticResource PrimaryBrush}"
+                                         HorizontalAlignment="Left" Margin="-2,0,0,0"/>
+                                <Ellipse Grid.Column="0" Width="4" Height="4" Fill="{StaticResource PrimaryBrush}"
+                                         HorizontalAlignment="Right" Margin="0,0,-2,0"/>
+                                <Ellipse Grid.Column="1" Width="4" Height="4" Fill="{StaticResource PrimaryBrush}"
+                                         HorizontalAlignment="Right" Margin="0,0,-2,0"/>
+                            </Grid>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid Margin="8,4,4,4">
+        <!-- Обычный контент обхода -->
+        <Grid x:Name="BypassMainContent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Обход" FontSize="18" FontWeight="Bold"
+                       Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+            <Button x:Name="RefreshBtn" Grid.Column="1" Style="{StaticResource IconButton}"
+                    Content="↻" Click="OnRefresh" ToolTip="Обновить серверы"/>
+            <Button x:Name="KeyBtn" Grid.Column="2" Style="{StaticResource IconButton}"
+                    Content="🔑" Click="OnShowSubscription" ToolTip="Подписка"/>
+        </Grid>
+
+        <controls:StatusBannerControl x:Name="StatusBanner" Grid.Row="1" Margin="0,0,0,10"/>
+
+        <!-- Две колонки: Off/On+Подключить | список серверов -->
+        <Grid Grid.Row="3" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Левая: орб + статистика + кнопка -->
+            <Border Grid.Column="0" Style="{StaticResource SectionCard}" Margin="0,0,8,0" Padding="14">
+                <StackPanel VerticalAlignment="Center">
+                    <Grid HorizontalAlignment="Center" Width="120" Height="120" Margin="0,4,0,10">
+                        <Ellipse x:Name="OrbOuter" Width="120" Height="120" Fill="{StaticResource OrbOuterBrush}"/>
+                        <Ellipse x:Name="OrbMiddle" Width="88" Height="88" Fill="{StaticResource OrbMiddleBrush}"/>
+                        <Ellipse x:Name="OrbInner" Width="60" Height="60" Fill="{StaticResource OrbOffBrush}"/>
+                        <TextBlock x:Name="OrbText" Text="OFF" FontSize="16" FontWeight="Black"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <StackPanel x:Name="OrbServerPanel" Orientation="Horizontal"
+                                HorizontalAlignment="Center" Margin="0,2,0,8"
+                                Visibility="Collapsed">
+                        <Border Width="26" Height="19" CornerRadius="4" Margin="0,0,8,0"
+                                BorderBrush="#33000000" BorderThickness="0.75"
+                                VerticalAlignment="Center" SnapsToDevicePixels="True">
+                            <Border.Clip>
+                                <RectangleGeometry Rect="0,0,26,19" RadiusX="4" RadiusY="4"/>
+                            </Border.Clip>
+                            <Image x:Name="OrbServerFlag" Stretch="UniformToFill"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                        </Border>
+                        <TextBlock x:Name="OrbServerName" Text="" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" MaxWidth="170"/>
+                    </StackPanel>
+                    <Button x:Name="ConnectBtn" Content="Подключить" Style="{StaticResource PrimaryButton}"
+                            Click="OnToggleConnect" Margin="8,0,8,4" Height="46"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Правая: список серверов — скругление + clip, без белого фона -->
+            <Border x:Name="ServerCardBorder" Grid.Column="1" Style="{StaticResource SectionCard}"
+                    Margin="8,0,0,0" Padding="0,0,0,4" ClipToBounds="True">
+                <StackPanel x:Name="ServerCardContent" ClipToBounds="True">
+                    <TextBlock Text="Сервер" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="14,10,14,4"/>
+                    <TextBlock x:Name="ServersEmptyText" FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               Margin="14,8" Visibility="Collapsed" TextWrapping="Wrap"/>
+                    <ListBox x:Name="ServerList"
+                             BorderThickness="0"
+                             Background="{StaticResource CardBrush}"
+                             Foreground="{StaticResource TextPrimaryBrush}"
+                             SelectionChanged="OnServerSelected"
+                             Height="250" MaxHeight="250"
+                             ClipToBounds="True"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                             ScrollViewer.CanContentScroll="False">
+                        <ListBox.Resources>
+                            <Style TargetType="ScrollBar" BasedOn="{StaticResource HiddenScrollBar}"/>
+                        </ListBox.Resources>
+                        <ListBox.Template>
+                            <ControlTemplate TargetType="ListBox">
+                                <Border Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        ClipToBounds="True">
+                                    <ScrollViewer Focusable="False"
+                                                  Padding="0"
+                                                  HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}"
+                                                  VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}"
+                                                  CanContentScroll="{TemplateBinding ScrollViewer.CanContentScroll}">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </ControlTemplate>
+                        </ListBox.Template>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="Focusable" Value="True"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <!-- Полоска слева у выбранного сервера — как на вкладке ВПН -->
+                                            <Grid Height="48" Background="Transparent" Cursor="Hand">
+                                                <Border x:Name="SelBar" Width="3" HorizontalAlignment="Left"
+                                                        Background="{StaticResource PrimaryBrush}"
+                                                        Visibility="Collapsed" Margin="4,8,0,8" CornerRadius="2"/>
+                                                <Border x:Name="Bd" Background="Transparent">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#0A000000"/>
+                                                </Trigger>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="Bd" Property="Background" Value="#145B588D"/>
+                                                    <Setter TargetName="SelBar" Property="Visibility" Value="Visible"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="48">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="38" Height="28" CornerRadius="6"
+                                            Margin="14,0,10,0" VerticalAlignment="Center"
+                                            BorderBrush="#33000000" BorderThickness="0.75"
+                                            Background="Transparent"
+                                            SnapsToDevicePixels="True">
+                                        <Border.Clip>
+                                            <RectangleGeometry Rect="0,0,38,28" RadiusX="6" RadiusY="6"/>
+                                        </Border.Clip>
+                                        <Image Source="{Binding FlagImage}"
+                                               Stretch="UniformToFill"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="1" Text="{Binding Country}" FontSize="14"
+                                               VerticalAlignment="Center" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- VK ссылка -->
+        <Border Grid.Row="4" Style="{StaticResource CompactLinkCard}" Margin="0,0,0,8">
+            <StackPanel>
+                <TextBlock Text="Ссылка VK звонка" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
+                <TextBox x:Name="VkInput" Style="{StaticResource LinkTextBox}"
+                         TextChanged="OnVkChanged"/>
+                <TextBlock x:Name="VkError" Text="Неверный формат ссылки"
+                           Foreground="{StaticResource ErrorBrush}" FontSize="11"
+                           Visibility="Collapsed" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Мощность 9 / 18 / 27 — компактнее -->
+        <Border Grid.Row="5" Style="{StaticResource SectionCard}" Margin="0" Padding="12,8">
+            <StackPanel>
+                <Grid>
+                    <TextBlock Text="Мощность" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{StaticResource PrimaryBrush}"/>
+                    <TextBlock x:Name="WorkersLabel" Text="18" FontSize="11" FontWeight="Bold"
+                               Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Right"/>
+                </Grid>
+                <Slider x:Name="WorkersSlider" Style="{StaticResource WorkersSteppedSlider}"
+                        Height="28" Value="18" ValueChanged="OnWorkersChanged" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+        </Grid>
+
+        <!-- Заглушка: обычный VPN без обхода (как Android BypassUpgradePrompt) -->
+        <Grid x:Name="UpgradePanel" Visibility="Collapsed" Background="{StaticResource BackgroundBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="0,0,0,8">
+                <TextBlock Text="Обход" FontSize="18" FontWeight="Bold"
+                           Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                <Button x:Name="UpgradeRefreshBtn" HorizontalAlignment="Right"
+                        Style="{StaticResource IconButton}"
+                        Content="↻" Click="OnUpgradeRefresh" ToolTip="Обновить подписку"/>
+            </Grid>
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                        MaxWidth="440" Margin="16,0">
+                <TextBlock Text="🔒" FontSize="42" HorizontalAlignment="Center" Margin="0,0,0,14"/>
+                <TextBlock Text="Обход недоступен" FontSize="20" FontWeight="Bold"
+                           TextAlignment="Center"
+                           Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,14"/>
+                <TextBlock TextAlignment="Center" TextWrapping="Wrap" FontSize="14" LineHeight="22"
+                           Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,22"
+                           Text="У вас режим «Обычный VPN».&#x0a;&#x0a;Чтобы пользоваться обходом при глушении интернета, смените режим на «Обход + VPN» в боте, затем нажмите стрелку обновления сверху."/>
+                <Button Content="Перейти (@ByPassMeVPN_bot)" Style="{StaticResource PrimaryButton}"
+                        Height="46" Click="OnOpenBot" Margin="8,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
